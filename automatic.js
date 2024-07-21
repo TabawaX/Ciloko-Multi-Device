@@ -75,7 +75,7 @@ async function backup() {
 }
 
     // +++++++++ make automated without cron ++++++++++++++
-    function readTaskStatus() {
+    function BacaStatus() {
         if (!fs.existsSync(JsonFileWaktu)) {
             return { task1Executed: false, task2Executed: false, lastExecutionDate: '' }
         }
@@ -83,7 +83,7 @@ async function backup() {
         return JSON.parse(rawData)
     }
 
-    function writeTaskStatus(status) {
+    function TulisStatus(status) {
         fs.writeFileSync(JsonFileWaktu, JSON.stringify(status, null, 2))
     }
 
@@ -98,15 +98,15 @@ async function backup() {
             status.task1Executed = false
             status.task2Executed = false
             status.lastExecutionDate = todayDate
-            writeTaskStatus(status)
+            TulisStatus(status)
             const ResetExecSmsg = `[${todayDate}] Reseting Database to false - Success`
             fs.appendFileSync(cron_file_logs, `${ResetExecSmsg}\n`)
         }
     }
 
-    async function checkAndExecuteTask() {
+    async function EsekusiOtomatis() {
         console.log("[ CHECKING ] Checking On Condition Automatic Or Not")
-        let status = readTaskStatus() // still thinking fortunately it relieves the CPU from parsing continuously
+        let status = BacaStatus() // still thinking fortunately it relieves the CPU from parsing continuously
 
         const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }))
         const hour = now.getHours()
@@ -129,7 +129,7 @@ async function backup() {
                 console.log(SuksesCron)
                 fs.appendFileSync(cron_file_logs, `${SuksesCron}\n`)
                 status.task1Executed = true
-                writeTaskStatus(status)
+                TulisStatus(status)
             } catch (err) {
                 const ErrorMsg = `[${date}-${hour}-${minute}] Error occurred: ${err}`
                 console.error(ErrorMsg)
@@ -146,15 +146,15 @@ async function backup() {
                 console.log(SuksesGroup)
                 fs.appendFileSync(cron_file_logs, `${SuksesGroup}\n`)
                 status.task2Executed = true
-                writeTaskStatus(status)
+                TulisStatus(status)
             } catch (err) {
                 const ErrorMsgTask2 = `[${date}-${hour}-${minute}] Error occurred: ${err}`
                 console.error(ErrorMsgTask2)
                 fs.appendFileSync(cron_file_logs, `${ErrorMsgTask2}\n`)
             }
         }
-        setTimeout(checkAndExecuteTask, TASK_INTERVAL)
+        setTimeout(EsekusiOtomatis, TASK_INTERVAL)
     }
     backup()
-    checkAndExecuteTask()
+    EsekusiOtomatis()
 }
